@@ -23,25 +23,26 @@ def classify_image(image_path):
 
         # Return the label with highest confidence
         class_idx = np.argmax(result)
-        return class_names[class_idx], float(result[class_idx]), result
+        confidence_scores = result.numpy()
+        return class_names[class_idx], confidence_scores
     except Exception as e:
-        return "Error", str(e), None
+        return "Error", str(e)
 
 # Function to display progress bar and confidence
 def custom_progress_bar(confidence, color1, color2):
-    st.markdown(
-        f"""
-        <div style="border-radius: 5px; overflow: hidden; width: 100%; font-size: 14px;">
-            <div style="width:{int(confidence*100)}%; background:{color1}; color: white; text-align: center; height: 24px; float: left;">
-                {int(confidence*100)}%
-            </div>
-            <div style="width:{100-int(confidence*100)}%; background: {color2}; color: white; text-align: center; height: 24px; float: left;">
-                {100-int(confidence*100)}%
-            </div>
+    percentage1 = confidence[0] * 100
+    percentage2 = confidence[1] * 100
+    progress_html = f"""
+    <div style="border: 1px solid #ddd; border-radius: 5px; overflow: hidden; width: 100%; font-size: 14px;">
+        <div style="width:{percentage1:.2f}%; background:{color1}; color: white; text-align: center; height: 24px; float: left;">
+            {percentage1:.2f}%
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        <div style="width:{percentage2:.2f}%; background: {color2}; color: white; text-align: center; height: 24px; float: left;">
+            {percentage2:.2f}%
+        </div>
+    </div>
+    """
+    st.sidebar.markdown(progress_html, unsafe_allow_html=True)
 
 # Streamlit UI
 st.title("Prediksi Kematangan Buah Naga - 1683")  # 4 digit npm terakhir
@@ -59,6 +60,7 @@ if st.sidebar.button("Prediksi"):
             
             # Perform prediction
             label, confidence, scores = classify_image(uploaded_file.name)
+            
             if label != "Error":
                 # Define colors for the bar and label
                 primary_color = "#00BFFF"  # Blue for "Matang"
@@ -66,13 +68,14 @@ if st.sidebar.button("Prediksi"):
                 label_color = primary_color if label == "Matang" else secondary_color
 
                 # Display prediction results
+                st.sidebar.write(f"**Nama File:** {uploaded_file.name}")
                 st.sidebar.markdown(f"<h4 style='color: {label_color};'>Prediksi: {label}</h4>", unsafe_allow_html=True)
-                st.sidebar.write("Confidence scores:")
-                for i, (class_name, confidence) in enumerate(zip(class_names, scores)):
+                for i, class_name in enumerate(zip(class_names, scores)):
                     st.sidebar.write(f"{class_name}: {confidence * 100:.2f}%")
                 
                 # Progress bar
                 custom_progress_bar(confidence, primary_color, secondary_color)
+                st.sidebar.write("---")
             else:
                 st.sidebar.error(f"Kesalahan saat memproses gambar {uploaded_file.name}: {confidence}")
     else:
@@ -80,6 +83,7 @@ if st.sidebar.button("Prediksi"):
 
 # Preview images in the main page
 if uploaded_files:
-    st.write("Preview:")
+    st.write("### Preview Gambar")
     for uploaded_file in uploaded_files:
+        image = Image.open(uploaded_file)
         st.image(uploaded_file, caption=f"{uploaded_file.name}", use_column_width=True)
