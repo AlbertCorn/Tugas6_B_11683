@@ -59,7 +59,7 @@ if st.sidebar.button("Prediksi"):
                 f.write(uploaded_file.getbuffer())
             
             # Perform prediction
-            label, confidence, scores = classify_image(uploaded_file.name)
+            label, confidence = classify_image(uploaded_file.name)
             
             if label != "Error":
                 # Define colors for the bar and label
@@ -67,14 +67,16 @@ if st.sidebar.button("Prediksi"):
                 secondary_color = "#FF4136"  # Red for "Mentah"
                 label_color = primary_color if label == "Matang" else secondary_color
 
-                # Display prediction results
                 st.sidebar.write(f"**Nama File:** {uploaded_file.name}")
                 st.sidebar.markdown(f"<h4 style='color: {label_color};'>Prediksi: {label}</h4>", unsafe_allow_html=True)
-                for i, class_name in enumerate(zip(class_names, scores)):
-                    st.sidebar.write(f"{class_name}: {confidence * 100:.2f}%")
+                
+                st.sidebar.write("**Confidence:**")
+                for i, class_name in enumerate(class_names):
+                    st.sidebar.write(f" - {class_name}: {confidence[i] * 100:.2f}%")
                 
                 # Progress bar
                 custom_progress_bar(confidence, primary_color, secondary_color)
+                
                 st.sidebar.write("---")
             else:
                 st.sidebar.error(f"Kesalahan saat memproses gambar {uploaded_file.name}: {confidence}")
