@@ -6,7 +6,7 @@ from PIL import Image
 
 # Load the pre-trained model
 # Sesuaikan dengan path model Anda (model terbaik yang di dump dalam format .h5)
-model = load_model("D:\Semester 5\Pembelajaran mesin dan Pembelajaran Mendalam\Modul Convolutional Neural Network\Tugas6_B_11683\model_mobilenet.h5")
+model = load_model(r"model_mobilenet.h5")
 class_names = ["Matang", "Mentah"]
 
 # Function to preprocess and classify image
